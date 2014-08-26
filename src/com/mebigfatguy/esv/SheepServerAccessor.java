@@ -1,5 +1,6 @@
 package com.mebigfatguy.esv;
 
+import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -12,7 +13,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -43,12 +46,21 @@ public class SheepServerAccessor {
 	
 	private String sheepUrl;
 	private String uid;
+	private Set<SheepListener> listeners;
 	
 	public SheepServerAccessor() throws IOException {	
 		uid = buildUid();
 		sheepUrl = getSheepURL();
 		getVideoDir().mkdirs();
-		updateNewSheep();
+		listeners = new HashSet<SheepListener>();
+	}
+	
+	public void addSheepListener(SheepListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void removeSheepListener(SheepListener listener) {
+		listeners.remove(listener);
 	}
 	
 	public static File getVideoDir() {
@@ -72,6 +84,9 @@ public class SheepServerAccessor {
 				String gen = listEl.getAttribute(GENATT);
 				String size = listEl.getAttribute(SIZEATT);
 				
+				String[] sizes = size.split(" +");
+				Dimension dim = new Dimension(Integer.parseInt(sizes[0]), Integer.parseInt(sizes[1]));
+				
 				File dir = new File(getVideoDir(), gen + "_" + size.replace(" ", ","));
 				dir.mkdir();
 				
@@ -87,6 +102,8 @@ public class SheepServerAccessor {
 						 OutputStream vos = new BufferedOutputStream(new FileOutputStream(new File(dir, id)))) {
 					    copy(vis, vos, Long.parseLong(vidSize));
 					}
+					
+					fireNewSheep(gen, id, dim);
 				}
 			}
 		} catch (MalformedURLException | ParserConfigurationException | XPathExpressionException | SAXException e) {
@@ -113,6 +130,12 @@ public class SheepServerAccessor {
 
 		} catch (NoSuchAlgorithmException | MalformedURLException | SAXException | ParserConfigurationException | XPathExpressionException e) {
 			throw new IOException("Failed fetching sheep server", e);
+		}
+	}
+	
+	private void fireNewSheep(String gen, String id, Dimension dim) {
+		for (SheepListener listener : listeners) {
+			listener.newSheep(gen, id, dim);
 		}
 	}
 	

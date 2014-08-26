@@ -10,6 +10,7 @@ public class ESV {
 			ESViewer viewer = new ESViewer(accessor);
 			viewer.setLocationRelativeTo(null);
 			viewer.setVisible(true);
+			accessor.watch();
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}

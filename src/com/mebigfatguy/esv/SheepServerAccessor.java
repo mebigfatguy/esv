@@ -47,6 +47,7 @@ public class SheepServerAccessor {
 	private String sheepUrl;
 	private String uid;
 	private Set<SheepListener> listeners;
+	private Thread watchThread;
 	
 	public SheepServerAccessor() throws IOException {	
 		uid = buildUid();
@@ -64,10 +65,33 @@ public class SheepServerAccessor {
 	}
 	
 	public static File getVideoDir() {
-		return new File(System.getProperty("java.io.tmpdir", ".esv"));
+		return new File(System.getProperty("java.io.tmpdir"), ".esv");
 	}
 	
-	public void updateNewSheep() throws IOException {
+	public void watch() {
+		watchThread = new Thread(new Runnable() {
+			
+			@Override()
+			public void run() {
+				try {
+					while (!Thread.interrupted()) {
+						try {
+							updateNewSheep();
+							Thread.sleep(10000);
+						} catch (IOException e) {
+							Thread.sleep(600000);
+						}
+					}
+				} catch (InterruptedException ie) {
+				}
+			}
+		});
+		
+		watchThread.setDaemon(true);
+		watchThread.start();
+	}
+	
+	private void updateNewSheep() throws IOException {
 		try {
 
 			URL u = new URL(String.format(LIST_SHEEP_ULR, sheepUrl, uid, VERSION));

@@ -5,6 +5,8 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.FileFilter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -47,18 +49,23 @@ public class ESViewer extends JFrame implements SheepListener {
 		root = new DefaultMutableTreeNode();
 		File dir = SheepServerAccessor.getVideoDir();
 		
+		final Pattern genFolderPattern = Pattern.compile("(.*)_(\\d+),(\\d+)");
 		
 		dir.listFiles(new FileFilter() {
 			
-			DefaultMutableTreeNode lastFolder = null;
+			GenNode lastFolder = null;
 			
 			@Override
 			public boolean accept(File pathName) {
 				if (pathName.isDirectory()) {
-					lastFolder = new DefaultMutableTreeNode();
-					lastFolder.setUserObject(pathName.getName());
-					root.add(lastFolder);
-					return true;
+					String name = pathName.getName();
+					
+					Matcher m = genFolderPattern.matcher(name);
+					if (m.matches()) {
+						lastFolder = new GenNode(m.group(1), new Dimension(Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3))));
+						root.add(lastFolder);
+						return true;
+					}
 				}
 				
 				SheepNode node = new SheepNode(lastFolder.toString(), pathName.getName(), new Dimension(800, 600));
@@ -72,19 +79,21 @@ public class ESViewer extends JFrame implements SheepListener {
 
 	@Override
 	public void newSheep(String gen, String id, Dimension dim) {
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) root.getFirstChild();
-		while (node != null) {
-			if (node.toString().equals(gen)) {
-				SheepNode child = new SheepNode(gen, id, dim);
-				node.add(child);
-				navModel.nodeStructureChanged(node);
-				return;
+		if (root.getChildCount() > 0) {
+			GenNode node = (GenNode) root.getFirstChild();
+			while (node != null) {
+				if (node.getGen().equals(gen)) {
+					SheepNode child = new SheepNode(gen, id, dim);
+					node.add(child);
+					navModel.nodeStructureChanged(node);
+					return;
+				}
+				
+				node = (GenNode) node.getNextNode();
 			}
-			
-			node = node.getNextNode();
 		}
 		
-		node = new DefaultMutableTreeNode(gen);
+		GenNode node = new GenNode(gen, dim);
 		root.add(node);
 		
 		SheepNode child = new SheepNode(gen, id, dim);

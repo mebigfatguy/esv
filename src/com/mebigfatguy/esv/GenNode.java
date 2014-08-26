@@ -4,15 +4,13 @@ import java.awt.Dimension;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-public class SheepNode extends DefaultMutableTreeNode {
+public class GenNode extends DefaultMutableTreeNode {
 
 	private String gen;
-	private String id;
 	private Dimension dim;
 	
-	public SheepNode(String gen, String id, Dimension dim) {
+	public GenNode(String gen, Dimension dim) {
 		this.gen = gen;
-		this.id = id;
 		this.dim = dim;
 	}
 
@@ -20,15 +18,11 @@ public class SheepNode extends DefaultMutableTreeNode {
 		return gen;
 	}
 
-	public String getId() {
-		return id;
-	}
-
 	public Dimension getDim() {
 		return dim;
 	}
 	
 	public String toString() {
-		return "Sheep " + id;
+		return "Generation " + gen;
 	}
 }

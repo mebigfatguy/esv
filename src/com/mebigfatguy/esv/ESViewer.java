@@ -11,7 +11,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
-public class ESViewer extends JFrame {
+public class ESViewer extends JFrame implements SheepListener {
 
 	private TreeNode root;
 	private DefaultTreeModel navModel;
@@ -33,5 +33,11 @@ public class ESViewer extends JFrame {
 		cp.add(videoPanel, BorderLayout.CENTER);
 		
 		pack();
+		
+		accessor.addSheepListener(this);
+	}
+
+	@Override
+	public void newSheep(String gen, String id, Dimension din) {
 	}
 }

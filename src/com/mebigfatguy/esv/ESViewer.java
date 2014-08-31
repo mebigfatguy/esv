@@ -18,19 +18,30 @@
 package com.mebigfatguy.esv;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.media.CannotRealizeException;
+import javax.media.Manager;
+import javax.media.NoPlayerException;
+import javax.media.Player;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 public class ESViewer extends JFrame implements SheepListener {
 
@@ -40,6 +51,7 @@ public class ESViewer extends JFrame implements SheepListener {
 	private DefaultTreeModel navModel;
 	private JTree navPanel;
 	private JPanel videoPanel;
+	private SheepNode activeVideo;
 	
 	public ESViewer() {
 		
@@ -52,11 +64,13 @@ public class ESViewer extends JFrame implements SheepListener {
 		navPanel.setRootVisible(false);
 		navPanel.setShowsRootHandles(true);
 		navPanel.setScrollsOnExpand(true);
+		navPanel.addTreeSelectionListener(new SheepSelectionListener());
 		JScrollPane scroller = new JScrollPane(navPanel);
 		scroller.setPreferredSize(new Dimension(200, 600));
 		cp.add(scroller, BorderLayout.WEST);
 		
 		videoPanel = new JPanel();
+		videoPanel.setLayout(new BorderLayout(4, 4));
 		videoPanel.setPreferredSize(new Dimension(800, 600));
 		cp.add(videoPanel, BorderLayout.CENTER);
 		
@@ -83,7 +97,7 @@ public class ESViewer extends JFrame implements SheepListener {
 	public synchronized void newGeneration(String gen, Dimension dim) {
 		DefaultMutableTreeNode loading = (DefaultMutableTreeNode) root.getFirstChild();
 		if (loading instanceof LoadingNode) {
-			root.remove(loading);	
+			root.remove(loading);
 			navModel.nodeStructureChanged(root);
 		}
 		
@@ -124,7 +138,7 @@ public class ESViewer extends JFrame implements SheepListener {
 						node.remove(loading);
 					}
 					
-					SheepNode child = new SheepNode(gen, id, dim);
+					SheepNode child = new SheepNode(gen, id + ".avi", dim);
 					node.add(child);
 					navModel.nodeStructureChanged(node);
 					return;
@@ -132,6 +146,27 @@ public class ESViewer extends JFrame implements SheepListener {
 				
 				node = (GenNode) node.getNextNode();
 			}
+		}
+	}
+	
+	private void stopVideo(SheepNode node) {
+		
+	}
+	
+	private void startVideo(SheepNode node) throws IOException {
+		try {
+			File file = new File(SheepServerAccessor.getVideoDir(), node.getRelativePath());
+			Player mediaPlayer = Manager.createRealizedPlayer(file.toURI().toURL());
+			Component video = mediaPlayer.getVisualComponent();
+	        Component controls = mediaPlayer.getControlPanelComponent();
+	        videoPanel.add( video, BorderLayout.CENTER );
+	       	videoPanel.add( controls, BorderLayout.SOUTH );
+	       	videoPanel.invalidate();
+	       	videoPanel.revalidate();
+	       	videoPanel.repaint();
+	       	mediaPlayer.start();
+		} catch (MalformedURLException | CannotRealizeException | NoPlayerException e) {
+			throw new IOException("Failed playing video: " + node, e);
 		}
 	}
 	
@@ -154,10 +189,30 @@ public class ESViewer extends JFrame implements SheepListener {
 				}
 			}
 			
-			SheepNode node = new SheepNode(lastFolder.toString(), pathName.getName(), new Dimension(800, 600));
+			SheepNode node = new SheepNode(lastFolder.getGen(), pathName.getName(), lastFolder.getDim());
 			lastFolder.add(node);
 			return false;
 		}
+	}
+	
+	class SheepSelectionListener implements TreeSelectionListener {
 
+		@Override
+		public void valueChanged(TreeSelectionEvent e) {
+			try {
+				TreePath path = e.getNewLeadSelectionPath();
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+				if (node instanceof SheepNode) {
+					if (activeVideo != null) {
+						stopVideo(activeVideo);
+					}
+					activeVideo = (SheepNode) node;
+					startVideo((SheepNode) node);
+				}
+			} catch (IOException ioe) {
+				JOptionPane.showMessageDialog(null, "Failed to play sheep video: " + activeVideo);
+				activeVideo = null;
+			}
+		}
 	}
 }

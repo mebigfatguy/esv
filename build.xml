@@ -1,12 +1,13 @@
 <project name="esv" default="jar" basedir="." xmlns:yank="antlib:com.mebigfatguy.yank">
     
+	<property file="version.properties" />
     <property file="user.properties" />
     <property file="build.properties" />
-    <property file="version.properties" />
     
     <property name="src.dir" value="${basedir}/src" />
 	<property name="target.dir" value="${basedir}/target" />
     <property name="classes.dir" value="${target.dir}/classes" />
+	<property name="lib.dir" value="${basedir}/lib" />
     <property name="javadoc.dir" value="${target.dir}/javadoc" />
     <property name="javac.source" value="1.7" />
     <property name="javac.target" value="1.7" />
@@ -17,15 +18,24 @@
 
     <path id="esv.classpath">
         <pathelement location="${classes.dir}"/>
+    	<pathelement location="${lib.dir}/jmf-${jmv.version}.jar" />
     </path>
         
-    <target name="init">
+    <target name="init" depends="yank">
         <mkdir dir="${target.dir}"/>
         <mkdir dir="${classes.dir}"/>
     </target>
         
     <target name="clean">
         <delete dir="${target.dir}"/>
+    </target>
+	
+   <target name="yank" unless="no.yank" xmlns:yank="antlib:com.mebigfatguy.yank">
+        <mkdir dir="${lib.dir}" />
+        <yank:yank yankFile="${basedir}/yank.xls" destination="${lib.dir}" source="true">
+            <server url="http://repo1.maven.org/maven2" />
+            <generateVersions propertyFileName="${basedir}/version.properties" />
+        </yank:yank>
     </target>
         
     <target name="compile" depends="init">

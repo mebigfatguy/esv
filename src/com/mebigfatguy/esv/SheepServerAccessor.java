@@ -140,7 +140,7 @@ public class SheepServerAccessor implements SheepFirer {
 					String url = n.getAttribute(URLATT);
 					String vidSize = n.getAttribute(SIZEATT);
 					
-					File vidFile = new File(dir, id);
+					File vidFile = new File(dir, id + ".avi");
 					Thread t = new Thread(new Downloader(new URL(url), vidFile, Long.parseLong(vidSize), gen, id, dim, this));
 					thds.add(t);
 					t.start();

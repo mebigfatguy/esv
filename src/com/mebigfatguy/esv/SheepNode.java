@@ -18,6 +18,7 @@
 package com.mebigfatguy.esv;
 
 import java.awt.Dimension;
+import java.io.File;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -35,6 +36,11 @@ public class SheepNode extends DefaultMutableTreeNode {
 		this.dim = dim;
 	}
 
+	public String getRelativePath() {
+		File dir = new File(gen + "_" + dim.width + "," + dim.height);
+		return new File(dir, id).toString();
+	}
+	
 	public String getGen() {
 		return gen;
 	}

@@ -23,6 +23,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class GenNode extends DefaultMutableTreeNode {
 
+	private static final long serialVersionUID = -1042758723689934358L;
+
 	private String gen;
 	private Dimension dim;
 	
@@ -39,6 +41,7 @@ public class GenNode extends DefaultMutableTreeNode {
 		return dim;
 	}
 	
+	@Override
 	public String toString() {
 		return "Generation " + gen;
 	}

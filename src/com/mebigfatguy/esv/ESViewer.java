@@ -34,12 +34,14 @@ import javax.swing.tree.DefaultTreeModel;
 
 public class ESViewer extends JFrame implements SheepListener {
 
+	private static final long serialVersionUID = -4955304611538812957L;
+
 	private DefaultMutableTreeNode root;
 	private DefaultTreeModel navModel;
 	private JTree navPanel;
 	private JPanel videoPanel;
 	
-	public ESViewer(SheepServerAccessor accessor) {
+	public ESViewer() {
 		
 		setTitle("Electric Sheep Viewer");
 		Container cp = getContentPane();

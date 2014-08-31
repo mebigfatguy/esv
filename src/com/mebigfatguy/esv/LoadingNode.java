@@ -21,6 +21,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class LoadingNode extends DefaultMutableTreeNode {
 
+	private static final long serialVersionUID = -4188314555713776717L;
+
+	@Override
 	public String toString() {
 		return "Loading Sheep...";
 	}

@@ -24,7 +24,7 @@ public class ESV {
 	public static void main(String[] args) {
 		try {
 			SheepServerAccessor accessor = new SheepServerAccessor();
-			ESViewer viewer = new ESViewer(accessor);
+			ESViewer viewer = new ESViewer();
 			viewer.setLocationRelativeTo(null);
 			viewer.setVisible(true);
 			accessor.addSheepListener(viewer);

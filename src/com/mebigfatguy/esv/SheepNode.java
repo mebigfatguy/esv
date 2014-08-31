@@ -23,6 +23,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class SheepNode extends DefaultMutableTreeNode {
 
+	private static final long serialVersionUID = -8634910107701195574L;
+
 	private String gen;
 	private String id;
 	private Dimension dim;
@@ -45,6 +47,7 @@ public class SheepNode extends DefaultMutableTreeNode {
 		return dim;
 	}
 	
+	@Override
 	public String toString() {
 		return "Sheep " + id;
 	}

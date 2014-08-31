@@ -52,6 +52,7 @@ public class ESViewer extends JFrame implements SheepListener {
 	private JTree navPanel;
 	private JPanel videoPanel;
 	private SheepNode activeVideo;
+	private Player mediaPlayer;
 	
 	public ESViewer() {
 		
@@ -150,13 +151,18 @@ public class ESViewer extends JFrame implements SheepListener {
 	}
 	
 	private void stopVideo(SheepNode node) {
-		
+		mediaPlayer.stop();
+		videoPanel.removeAll();
+       	videoPanel.invalidate();
+       	videoPanel.revalidate();
+       	videoPanel.repaint();
+       	activeVideo = null;
 	}
 	
 	private void startVideo(SheepNode node) throws IOException {
 		try {
 			File file = new File(SheepServerAccessor.getVideoDir(), node.getRelativePath());
-			Player mediaPlayer = Manager.createRealizedPlayer(file.toURI().toURL());
+			mediaPlayer = Manager.createRealizedPlayer(file.toURI().toURL());
 			Component video = mediaPlayer.getVisualComponent();
 	        Component controls = mediaPlayer.getControlPanelComponent();
 	        videoPanel.add( video, BorderLayout.CENTER );

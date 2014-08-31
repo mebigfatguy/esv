@@ -111,7 +111,8 @@ public class SheepServerAccessor {
 				String[] sizes = size.split(" +");
 				Dimension dim = new Dimension(Integer.parseInt(sizes[0]), Integer.parseInt(sizes[1]));
 				
-				File dir = new File(getVideoDir(), gen + "_" + size.replace(" ", ","));
+				fireGeneration(gen, dim);
+				File dir = new File(getVideoDir(), gen + "_" + dim.width + "," + dim.height);
 				dir.mkdir();
 				
 				xpe = xp.compile("/list/sheep");
@@ -157,6 +158,11 @@ public class SheepServerAccessor {
 		}
 	}
 	
+	private void fireGeneration(String gen, Dimension dim) {
+		for (SheepListener listener : listeners) {
+			listener.newGeneration(gen, dim);
+		}
+	}
 	private void fireNewSheep(String gen, String id, Dimension dim) {
 		for (SheepListener listener : listeners) {
 			listener.newSheep(gen, id, dim);

@@ -74,18 +74,25 @@ public class ESViewer extends JFrame implements SheepListener {
 			}
 		});
 		
+		if (root.getChildCount() == 0) {
+			root.add(new LoadingNode());
+		}
 		navModel = new DefaultTreeModel(root);
 	}
 
 	@Override
-	public void newSheep(String gen, String id, Dimension dim) {
+	public void newGeneration(String gen, Dimension dim) {
+		DefaultMutableTreeNode loading = (DefaultMutableTreeNode) root.getFirstChild();
+		if (loading instanceof LoadingNode) {
+			root.remove(loading);	
+			navModel.nodeStructureChanged(root);
+		}
+		
 		if (root.getChildCount() > 0) {
+			
 			GenNode node = (GenNode) root.getFirstChild();
 			while (node != null) {
 				if (node.getGen().equals(gen)) {
-					SheepNode child = new SheepNode(gen, id, dim);
-					node.add(child);
-					navModel.nodeStructureChanged(node);
 					return;
 				}
 				
@@ -95,9 +102,37 @@ public class ESViewer extends JFrame implements SheepListener {
 		
 		GenNode node = new GenNode(gen, dim);
 		root.add(node);
+		loading = new LoadingNode();
+		node.add(loading);
+		navModel.nodeStructureChanged(root);
+	}
+	
+	@Override
+	public void newSheep(String gen, String id, Dimension dim) {
+		DefaultMutableTreeNode loading = (DefaultMutableTreeNode) root.getFirstChild();
+		if (loading instanceof LoadingNode) {
+			root.remove(loading);	
+			navModel.nodeStructureChanged(root);
+		}
 		
-		SheepNode child = new SheepNode(gen, id, dim);
-		node.add(child);
-		navModel.nodeStructureChanged(node);
+		if (root.getChildCount() > 0) {
+			
+			GenNode node = (GenNode) root.getFirstChild();
+			while (node != null) {
+				if (node.getGen().equals(gen)) {
+					loading = (DefaultMutableTreeNode) node.getFirstChild();
+					if (loading instanceof LoadingNode) {
+						node.remove(loading);
+					}
+					
+					SheepNode child = new SheepNode(gen, id, dim);
+					node.add(child);
+					navModel.nodeStructureChanged(node);
+					return;
+				}
+				
+				node = (GenNode) node.getNextNode();
+			}
+		}
 	}
 }

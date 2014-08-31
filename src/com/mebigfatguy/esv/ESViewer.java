@@ -49,8 +49,10 @@ public class ESViewer extends JFrame implements SheepListener {
 		navPanel = new JTree(navModel);
 		navPanel.setRootVisible(false);
 		navPanel.setShowsRootHandles(true);
-		navPanel.setPreferredSize(new Dimension(200, 100));
-		cp.add(new JScrollPane(navPanel), BorderLayout.WEST);
+		navPanel.setScrollsOnExpand(true);
+		JScrollPane scroller = new JScrollPane(navPanel);
+		scroller.setPreferredSize(new Dimension(200, 600));
+		cp.add(scroller, BorderLayout.WEST);
 		
 		videoPanel = new JPanel();
 		videoPanel.setPreferredSize(new Dimension(800, 600));

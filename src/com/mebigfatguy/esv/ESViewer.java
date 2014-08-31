@@ -32,6 +32,7 @@ public class ESViewer extends JFrame implements SheepListener {
 		buildModel();
 		navPanel = new JTree(navModel);
 		navPanel.setRootVisible(false);
+		navPanel.setShowsRootHandles(true);
 		navPanel.setPreferredSize(new Dimension(200, 100));
 		cp.add(navPanel, BorderLayout.WEST);
 		
@@ -48,35 +49,15 @@ public class ESViewer extends JFrame implements SheepListener {
 	private void buildModel() {
 		root = new DefaultMutableTreeNode();
 		File dir = SheepServerAccessor.getVideoDir();
-		
-		final Pattern genFolderPattern = Pattern.compile("(.*)_(\\d+),(\\d+)");
-		
-		dir.listFiles(new FileFilter() {
-			
-			GenNode lastFolder = null;
-			
-			@Override
-			public boolean accept(File pathName) {
-				if (pathName.isDirectory()) {
-					String name = pathName.getName();
-					
-					Matcher m = genFolderPattern.matcher(name);
-					if (m.matches()) {
-						lastFolder = new GenNode(m.group(1), new Dimension(Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3))));
-						root.add(lastFolder);
-						return true;
-					}
-				}
 				
-				SheepNode node = new SheepNode(lastFolder.toString(), pathName.getName(), new Dimension(800, 600));
-				lastFolder.add(node);
-				return false;
-			}
-		});
+		SheepFilter filter = new SheepFilter();
+		dir.listFiles(filter);
 		
 		if (root.getChildCount() == 0) {
 			root.add(new LoadingNode());
 		}
+		
+		
 		navModel = new DefaultTreeModel(root);
 	}
 
@@ -134,5 +115,31 @@ public class ESViewer extends JFrame implements SheepListener {
 				node = (GenNode) node.getNextNode();
 			}
 		}
+	}
+	
+	class SheepFilter implements FileFilter {
+		private final Pattern genFolderPattern = Pattern.compile("(.*)_(\\d+),(\\d+)");
+		private GenNode lastFolder = null;
+		
+		@Override
+		public boolean accept(File pathName) {
+			if (pathName.isDirectory()) {
+				String name = pathName.getName();
+				
+				Matcher m = genFolderPattern.matcher(name);
+				if (m.matches()) {
+					lastFolder = new GenNode(m.group(1), new Dimension(Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3))));
+					root.add(lastFolder);
+					
+					pathName.listFiles(this);	
+					return false;
+				}
+			}
+			
+			SheepNode node = new SheepNode(lastFolder.toString(), pathName.getName(), new Dimension(800, 600));
+			lastFolder.add(node);
+			return false;
+		}
+
 	}
 }

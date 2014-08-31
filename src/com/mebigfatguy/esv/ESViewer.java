@@ -75,7 +75,7 @@ public class ESViewer extends JFrame implements SheepListener {
 	}
 
 	@Override
-	public void newGeneration(String gen, Dimension dim) {
+	public synchronized void newGeneration(String gen, Dimension dim) {
 		DefaultMutableTreeNode loading = (DefaultMutableTreeNode) root.getFirstChild();
 		if (loading instanceof LoadingNode) {
 			root.remove(loading);	
@@ -102,7 +102,7 @@ public class ESViewer extends JFrame implements SheepListener {
 	}
 	
 	@Override
-	public void newSheep(String gen, String id, Dimension dim) {
+	public synchronized void newSheep(String gen, String id, Dimension dim) {
 		DefaultMutableTreeNode loading = (DefaultMutableTreeNode) root.getFirstChild();
 		if (loading instanceof LoadingNode) {
 			root.remove(loading);	

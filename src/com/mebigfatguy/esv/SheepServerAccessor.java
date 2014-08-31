@@ -18,19 +18,17 @@
 package com.mebigfatguy.esv;
 
 import java.awt.Dimension;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
@@ -49,7 +47,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class SheepServerAccessor {
+public class SheepServerAccessor implements SheepFirer {
 
 	private static final String SHEEP_URL = "http://community.sheepserver.net/query.php?q=redir&u=%s&p=%s&v=%s&i=%s";
 	private static final String LIST_SHEEP_ULR = "%scgi/list?u=%s&v=%s";
@@ -132,6 +130,8 @@ public class SheepServerAccessor {
 				File dir = new File(getVideoDir(), gen + "_" + dim.width + "," + dim.height);
 				dir.mkdir();
 				
+				List<Thread> thds = new ArrayList<>();
+				
 				xpe = xp.compile("/list/sheep");
 				NodeList nl = (NodeList) xpe.evaluate(d, XPathConstants.NODESET);
 				for (int i = 0; i < nl.getLength(); i++) {
@@ -139,15 +139,18 @@ public class SheepServerAccessor {
 					String id = n.getAttribute(IDATT);
 					String url = n.getAttribute(URLATT);
 					String vidSize = n.getAttribute(SIZEATT);
-					File vidFile = new File(dir, id);
-					try (InputStream vis = new BufferedInputStream(new URL(url).openStream());
-						 OutputStream vos = new BufferedOutputStream(new FileOutputStream(vidFile))) {
-					    copy(vis, vos, Long.parseLong(vidSize));
-					} catch (IOException ioe) {
-						vidFile.delete();
-					}
 					
-					fireNewSheep(gen, id, dim);
+					File vidFile = new File(dir, id);
+					Thread t = new Thread(new Downloader(new URL(url), vidFile, Long.parseLong(vidSize), gen, id, dim, this));
+					thds.add(t);
+					t.start();
+				}
+				
+				for (Thread t : thds) {
+					try {
+						t.join();
+					} catch (InterruptedException ie) {
+					}
 				}
 			}
 		} catch (MalformedURLException | ParserConfigurationException | XPathExpressionException | SAXException e) {
@@ -182,7 +185,9 @@ public class SheepServerAccessor {
 			listener.newGeneration(gen, dim);
 		}
 	}
-	private void fireNewSheep(String gen, String id, Dimension dim) {
+	
+	@Override
+	public void fireNewSheep(String gen, String id, Dimension dim) {
 		for (SheepListener listener : listeners) {
 			listener.newSheep(gen, id, dim);
 		}
@@ -207,16 +212,5 @@ public class SheepServerAccessor {
 		Random r = new Random(System.currentTimeMillis());
 		long rid = r.nextLong();
 		return Long.toHexString(rid);
-	}
-	
-	private static void copy(InputStream is, OutputStream os, long remaining) throws IOException {
-		byte[] buffer = new byte[102400];
-
-		while (remaining > 0) {
-			int reqLen = (int) Math.min(102400,  remaining);
-			int actLen = is.read(buffer, 0, reqLen);
-			remaining -= actLen;
-			os.write(buffer, 0, actLen);
-		}
 	}
 }

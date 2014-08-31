@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -49,7 +50,7 @@ public class ESViewer extends JFrame implements SheepListener {
 		navPanel.setRootVisible(false);
 		navPanel.setShowsRootHandles(true);
 		navPanel.setPreferredSize(new Dimension(200, 100));
-		cp.add(navPanel, BorderLayout.WEST);
+		cp.add(new JScrollPane(navPanel), BorderLayout.WEST);
 		
 		videoPanel = new JPanel();
 		videoPanel.setPreferredSize(new Dimension(800, 600));

@@ -33,7 +33,6 @@ import javax.swing.tree.DefaultTreeModel;
 
 public class ESViewer extends JFrame implements SheepListener {
 
-	private SheepServerAccessor sheepAccessor;
 	private DefaultMutableTreeNode root;
 	private DefaultTreeModel navModel;
 	private JTree navPanel;
@@ -42,7 +41,6 @@ public class ESViewer extends JFrame implements SheepListener {
 	public ESViewer(SheepServerAccessor accessor) {
 		
 		setTitle("Electric Sheep Viewer");
-		sheepAccessor = accessor;
 		Container cp = getContentPane();
 		cp.setLayout(new BorderLayout(4, 4));
 		
@@ -59,8 +57,6 @@ public class ESViewer extends JFrame implements SheepListener {
 		
 		pack();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		accessor.addSheepListener(this);
 	}
 	
 	private void buildModel() {

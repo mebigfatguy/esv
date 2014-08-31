@@ -122,10 +122,12 @@ public class SheepServerAccessor {
 					String id = n.getAttribute(IDATT);
 					String url = n.getAttribute(URLATT);
 					String vidSize = n.getAttribute(SIZEATT);
-					
+					File vidFile = new File(dir, id);
 					try (InputStream vis = new BufferedInputStream(new URL(url).openStream());
-						 OutputStream vos = new BufferedOutputStream(new FileOutputStream(new File(dir, id)))) {
+						 OutputStream vos = new BufferedOutputStream(new FileOutputStream(vidFile))) {
 					    copy(vis, vos, Long.parseLong(vidSize));
+					} catch (IOException ioe) {
+						vidFile.delete();
 					}
 					
 					fireNewSheep(gen, id, dim);

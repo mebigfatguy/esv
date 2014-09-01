@@ -204,18 +204,20 @@ public class ESViewer extends JFrame implements SheepListener {
 	class SheepSelectionListener implements TreeSelectionListener {
 
 		@Override
-		public void valueChanged(TreeSelectionEvent e) {
+		public void valueChanged(TreeSelectionEvent ev) {
 			try {
-				TreePath path = e.getNewLeadSelectionPath();
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-				if (node instanceof SheepNode) {
-					if (activeVideo != null) {
-						stopVideo(activeVideo);
+				TreePath path = ev.getNewLeadSelectionPath();
+				if (path != null) {
+					DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+					if (node instanceof SheepNode) {
+						if (activeVideo != null) {
+							stopVideo(activeVideo);
+						}
+						activeVideo = (SheepNode) node;
+						startVideo((SheepNode) node);
 					}
-					activeVideo = (SheepNode) node;
-					startVideo((SheepNode) node);
 				}
-			} catch (IOException ioe) {
+			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, "Failed to play sheep video: " + activeVideo);
 				activeVideo = null;
 			}

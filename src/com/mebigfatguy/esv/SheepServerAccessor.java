@@ -31,6 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -129,28 +131,22 @@ public class SheepServerAccessor implements SheepFirer {
 				fireGeneration(gen, dim);
 				File dir = new File(getVideoDir(), gen + "_" + dim.width + "," + dim.height);
 				dir.mkdir();
-				
-				List<Thread> thds = new ArrayList<>();
-				
-				xpe = xp.compile("/list/sheep");
-				NodeList nl = (NodeList) xpe.evaluate(d, XPathConstants.NODESET);
-				for (int i = 0; i < nl.getLength(); i++) {
-					Element n = (Element) nl.item(i);
-					String id = n.getAttribute(IDATT);
-					String url = n.getAttribute(URLATT);
-					String vidSize = n.getAttribute(SIZEATT);
-					
-					File vidFile = new File(dir, id + ".avi");
-					Thread t = new Thread(new Downloader(new URL(url), vidFile, Long.parseLong(vidSize), gen, id, dim, this));
-					thds.add(t);
-					t.start();
-				}
-				
-				for (Thread t : thds) {
-					try {
-						t.join();
-					} catch (InterruptedException ie) {
+
+				ExecutorService es = Executors.newFixedThreadPool(50);
+				try {					
+					xpe = xp.compile("/list/sheep");
+					NodeList nl = (NodeList) xpe.evaluate(d, XPathConstants.NODESET);
+					for (int i = 0; i < nl.getLength(); i++) {
+						Element n = (Element) nl.item(i);
+						String id = n.getAttribute(IDATT);
+						String url = n.getAttribute(URLATT);
+						String vidSize = n.getAttribute(SIZEATT);
+						
+						File vidFile = new File(dir, id + ".avi");
+						es.execute(new Downloader(new URL(url), vidFile, Long.parseLong(vidSize), gen, id, dim, this));
 					}
+				} finally {
+					es.shutdown();
 				}
 			}
 		} catch (MalformedURLException | ParserConfigurationException | XPathExpressionException | SAXException e) {

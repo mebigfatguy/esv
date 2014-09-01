@@ -29,6 +29,7 @@ import java.net.URL;
 
 public class Downloader implements Runnable {
 
+	private static final int BUFFER_SIZE = 102400;
 	private URL source;
 	private File destination;
 	private long vidSize;
@@ -59,10 +60,10 @@ public class Downloader implements Runnable {
 	}
 	
 	private static void copy(InputStream is, OutputStream os, long remaining) throws IOException {
-		byte[] buffer = new byte[102400];
+		byte[] buffer = new byte[BUFFER_SIZE];
 
 		while (remaining > 0) {
-			int reqLen = (int) Math.min(102400,  remaining);
+			int reqLen = (int) Math.min(BUFFER_SIZE, remaining);
 			int actLen = is.read(buffer, 0, reqLen);
 			remaining -= actLen;
 			os.write(buffer, 0, actLen);

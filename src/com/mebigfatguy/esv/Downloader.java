@@ -51,7 +51,7 @@ public class Downloader implements Runnable {
 	@Override
 	public void run() {
 		try (InputStream vis = new BufferedInputStream(source.openStream());
-			 OutputStream vos = new BufferedOutputStream(new FileOutputStream(destination))) {
+			 OutputStream vos = new FileOutputStream(destination)) {
 		    copy(vis, vos, vidSize);
 		    sheepFirer.fireNewSheep(generation, sheepId, dimension);
 		} catch (IOException ioe) {

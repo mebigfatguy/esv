@@ -18,7 +18,7 @@
 
     <path id="esv.classpath">
         <pathelement location="${classes.dir}"/>
-    	<pathelement location="${lib.dir}/jmf-${jmv.version}.jar" />
+    	<pathelement location="${lib.dir}/jmf-${jmf.version}.jar" />
     </path>
         
     <target name="init" depends="yank">

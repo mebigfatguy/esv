@@ -19,7 +19,6 @@ package com.mebigfatguy.esv;
 
 import java.awt.Dimension;
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
